@@ -1,0 +1,50 @@
+
+version: '3.8'
+
+services:
+  server:
+    build: .
+    restart: on-failure
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - ./:/usr/src/app
+    command: ["./scripts/wait-for-db.sh", "./scripts/run.sh"]
+    
+    depends_on:
+      
+      database:
+        condition: service_healthy
+      
+      
+    
+  
+  database:
+    image: postgres:16.3-alpine3.20
+    restart: always
+    env_file: .env
+    user: postgres
+    volumes:
+      - database-data:/var/lib/postgresql/data
+    expose:
+      - 5432
+    healthcheck:
+      test: ['CMD', 'pg_isready']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  
+  
+  adminer:
+    image: adminer:4.8.1
+    restart: always
+    ports:
+      - "8080:8080"
+  
+volumes:
+  
+  database-data:
+  
+  
