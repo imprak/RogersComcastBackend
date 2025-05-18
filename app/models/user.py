@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer, String
-from
 
-RogersComcastBackend.app.models.base
-import Base
+from app.models.base import Base
 
 
 class User(Base):

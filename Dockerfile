@@ -22,10 +22,10 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 WORKDIR /usr/src/app
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
-COPY Pipfile.lock Pipfile /usr/src/app/
-RUN pip install pipenv && pipenv install --system
+COPY poetry.lock pyproject.toml /usr/src/app/
+RUN pip install poetry && poetry install
 
-# Create a non-privileged user that the app will run under.
+ Create a non-privileged user that the app will run under.
 ARG UID=10001
 RUN adduser \
     --disabled-password \
@@ -46,4 +46,6 @@ COPY . .
 EXPOSE 8000
 
 # Run the application.
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+#CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+
+ENTRYPOINT ["/bin/sh", "scripts/run.sh"]

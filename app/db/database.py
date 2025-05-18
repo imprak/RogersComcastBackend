@@ -1,16 +1,9 @@
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from RogersComcastBackend.app.core.config import settings
+from app.core.config import settings
 
-engine = create_async_engine(settings.DATABASE_URL, echo=True)
-async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
-async def init_db():
-    async with engine.begin() as conn:
-        # Uncomment to create tables on startup (for dev)
-        # await conn.run_sync(Base.metadata.create_all)
-        pass
+DATABASE_URL = f"mysql+pymysql://{settings.DB_USERNAME}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
+engine = create_engine(DATABASE_URL, echo=True)
 
-async def get_db() -> AsyncSession:
-    async with async_session() as session:
-        yield session
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

@@ -1,22 +1,29 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-import os
 
-pg_user = os.getenv("POSTGRES_USER", "user")
-pg_password = os.getenv("POSTGRES_PASSWORD", "password")
-pg_host = os.getenv("POSTGRES_HOST", "localhost")
-pg_database = os.getenv("POSTGRES_DB", "RogersComcastBackend")
+class CommonSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_file="../.env",
+                                      env_file_encoding="utf-8")
 
 
-class Settings(BaseSettings):
+
+class AppSettings(CommonSettings):
     APP_NAME: str = "RogersComcastBackend"
     APP_VERSION: str = "0.1.0"
     ENVIRONMENT: str = "development"
-    DATABASE_URL: str =  f"postgresql+asyncpg://{pg_user}:{pg_password}@{pg_host}/{pg_database}"
-    
-    
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+class DbSettings(CommonSettings):
+    DB_HOST: str
+    DB_PORT: str
+    DB_USERNAME: str
+    DB_PASSWORD: str
+    DB_NAME: str
+
+
+class Settings(DbSettings, AppSettings):
+    pass
+
 
 
 settings = Settings()

@@ -1,11 +1,10 @@
 import logging
-import sys
 
-def setup_logging():
-    logger = logging.getLogger("RogersComcastBackend")
-    logger.setLevel(logging.INFO)
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    ))
-    logger.addHandler(handler)
+from app.core.config import settings
+
+
+logging.basicConfig(
+    format=settings.LOGGER_FORMAT,
+    level=logging.DEBUG,
+)
+log = logging.getLogger(name=settings.LOGGER_APP_NAME)

@@ -1,7 +1,7 @@
 #!/bin/bash
-host="$1"
-port="$2"
-until pg_isready -h "$host" -p "$port"; do
+host=$DB_HOST
+port=$DB_PORT
+until mysqladmin ping -h "$host" -P "$port" --silent; do
   echo "Waiting for database at $host:$port..."
   sleep 1
 done
