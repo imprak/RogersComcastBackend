@@ -2,7 +2,7 @@ from uuid import UUID as CORE_UUID
 from sqlalchemy import Column, DateTime, Integer, String, func, Text, UUID, Enum
 
 from app.core import enums
-from app.models.base import Base
+from app.models import Base
 from app import schemas
 
 

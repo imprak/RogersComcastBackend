@@ -3,7 +3,7 @@ from uuid import UUID as CORE_UUID
 from sqlalchemy import Column, DateTime, Integer, String, UUID, func, Text
 
 
-from app.models.base import Base
+from app.models import Base
 from app import schemas
 
 

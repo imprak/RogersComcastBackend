@@ -1,12 +1,14 @@
 from uuid import UUID as CORE_UUID
-from sqlalchemy import Column, DateTime, String, func, UUID
+from sqlalchemy import Column, DateTime, String, Integer, func, UUID
 
-from app.models.base import Base
+from app.models import Base
 from app import schemas
 
 
 class Order(Base):
     __tablename__ = "order"
+
+    id = Column(Integer, primary_key=True, index=True)
     order_id = Column(UUID, nullable=False)
     created_by = Column(String(255), nullable=False)
     updated_by = Column(String(255), nullable=False)

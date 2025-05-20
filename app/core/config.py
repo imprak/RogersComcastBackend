@@ -14,11 +14,11 @@ class AppSettings(CommonSettings):
 
 
 class DbSettings(CommonSettings):
-    DB_HOST: str
-    DB_PORT: str
-    DB_USERNAME: str
-    DB_PASSWORD: str
-    DB_NAME: str
+    DB_HOST: str = "10.168.171.11"
+    DB_PORT: int = 3306
+    DB_USERNAME: str = "root"
+    DB_PASSWORD: str = "root"
+    DB_NAME: str = "rogers"
 
 
 class Settings(DbSettings, AppSettings):
