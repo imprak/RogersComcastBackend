@@ -33,6 +33,6 @@ class Api(Base):
         )
 
     def to_schema(self) -> schemas.ApiCreate:
-        return schemas.HubReturn.model_validate(
+        return schemas.ApiReturn.model_validate(
             self, by_name=True, from_attributes=True
         ).model_dump(by_alias=True)

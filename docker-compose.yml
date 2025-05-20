@@ -7,10 +7,10 @@ services:
     restart: on-failure
     ports:
       - "8083:8000"
-    env_file: .env
+#    env_file: .env
     volumes:
       - ./:/usr/src/app
-    command: ["./scripts/wait-for-db.sh", "./scripts/run.sh"]
+#    command: ["./scripts/wait-for-db.sh", "./scripts/run.sh"]
     
 #    depends_on:
 #

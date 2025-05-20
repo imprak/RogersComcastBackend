@@ -2,6 +2,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, Path, Query, status
 from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from app import schemas, models, log, cruds
@@ -17,13 +18,12 @@ async def create(
     client_id: str = Query(None, alias="clientId"),
     db: Session = Depends(get_db),
 ):
-
     api_id = uuid.uuid4()
-    db_obj = cruds.api_cruds.create(db=db, data=data_in, api_id=api_id)
+    db_obj = cruds.api_cruds.create(db=db, data_in=data_in, api_id=api_id)
 
-    JSONResponse(
+    return JSONResponse(
         status_code=status.HTTP_201_CREATED,
-        content=db_obj.to_schema(),
+        content=jsonable_encoder(db_obj.to_schema()),
     )
 
 
@@ -38,7 +38,7 @@ def get_multi(
     db_objs = cruds.api_cruds.get_multi(db=db, page=page, page_size=page_size)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content=[db_obj.to_schema() for db_obj in db_objs],
+        content=[jsonable_encoder(db_obj.to_schema()) for db_obj in db_objs],
     )
 
 
@@ -46,7 +46,7 @@ def get_multi(
 def delete(
     partner_id: str = Path(alias="partnerId"),
     client_id: str = Query(None, alias="clientId"),
-    api_id: str = Query(alias="apiId"),
+    api_id: uuid.UUID = Query(alias="apiId"),
     db: Session = Depends(get_db),
 ):
     db_obj = cruds.api_cruds.get_by_api_id(db=db, api_id=api_id)
@@ -56,6 +56,7 @@ def delete(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "not found"},
         )
-    cruds.hub_cruds.delete(db=db, db_obj=db_obj)
+
+    cruds.api_cruds.delete(db=db, db_obj=db_obj)
 
     return status.HTTP_204_NO_CONTENT
