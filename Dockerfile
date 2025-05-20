@@ -25,7 +25,7 @@ WORKDIR /usr/src/app
 COPY poetry.lock pyproject.toml /usr/src/app/
 RUN pip install poetry && poetry install
 
- Create a non-privileged user that the app will run under.
+# Create a non-privileged user that the app will run under.
 ARG UID=10001
 RUN adduser \
     --disabled-password \
