@@ -110,12 +110,13 @@ class PpodIntentUpdate(PpodIntentBase):
 
 
 class PpodIntentReturn(PpodIntentBase):
-    ppod_intent_id: UUID4 = Field(
-        examples=["554aab05-dd7f-44ec-be0c-749eb083505c"], alias="ppodIntentId"
+    ppod_intent_id: Optional[UUID4] = Field(
+        None, examples=["554aab05-dd7f-44ec-be0c-749eb083505c"], alias="ppodIntentId"
     )
     cpod_intent_id: Optional[UUID4] = Field(
         None, examples=["554aab05-dd7f-44ec-be0c-749eb083505c"], alias="cpodIntentId"
     )
+    is_draft: bool = Field(True, alias="isDraft")
 
     created_by: str = Field(alias="createdBy")
     updated_by: str = Field(alias="updatedBy")

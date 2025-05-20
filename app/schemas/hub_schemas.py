@@ -37,11 +37,11 @@ class HubUpdate(HubBase):
 
 
 class HubReturn(HubBase):
-    hub_id: UUID4 = Field(
-        examples=["554aab05-dd7f-44ec-be0c-749eb083505c"], alias="hubId"
+    hub_id: Optional[UUID4] = Field(
+        None, examples=["554aab05-dd7f-44ec-be0c-749eb083505c"], alias="hubId"
     )
     parent_hub_name: str = Field(alias="parentHubName")
-
+    is_draft: bool = Field(True, alias="isDraft")
     created_by: str = Field(alias="createdBy")
     updated_by: str = Field(alias="updatedBy")
     created_at: datetime = Field(alias="createdAt")

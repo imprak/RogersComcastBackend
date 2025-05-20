@@ -1,6 +1,7 @@
+import uuid
 from uuid import UUID as CORE_UUID
 
-from sqlalchemy import Column, DateTime, Integer, String, UUID, func, Text
+from sqlalchemy import Column, DateTime, Integer, Boolean, String, UUID, func, Text
 
 from app.models import Base
 from app import schemas
@@ -10,7 +11,8 @@ class Hub(Base):
     __tablename__ = "hub"
 
     id = Column(Integer, primary_key=True, index=True)
-    hub_id = Column(UUID, nullable=False)
+    is_draft = Column(Boolean, default=True)
+    hub_id = Column(UUID, default=uuid.uuid4)
     parent_hub_name = Column(String(255), nullable=False)
     ref_parent_hub_name = Column(String(255), nullable=False)
     ref_parent_hub_id = Column(UUID, nullable=False)
@@ -27,11 +29,8 @@ class Hub(Base):
     updated_at = Column(DateTime(timezone=True), default=func.utc_timestamp())
 
     @classmethod
-    def from_schema(
-        cls, schema: schemas.HubCreate, hub_id: CORE_UUID, parent_hub_name: str
-    ) -> "Hub":
+    def from_schema(cls, schema: schemas.HubCreate, parent_hub_name: str) -> "Hub":
         content = {
-            "hub_id": hub_id,
             "parent_hub_name": parent_hub_name,
             "ref_parent_hub_name": schema.ref_parent_hub_name,
             "ref_parent_hub_id": schema.ref_parent_hub_id,
@@ -50,6 +49,7 @@ class Hub(Base):
     def to_schema(self) -> schemas.HubReturn:
         content = {
             "hub_id": self.hub_id,
+            "is_draft": self.is_draft,
             "parent_hub_name": self.parent_hub_name,
             "hub_name": self.hub_name,
             "hub_type": self.hub_type,

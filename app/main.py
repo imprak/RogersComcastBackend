@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers.v1 import users
+from app.routers.v1 import users, api_endpoints, hub_endpoints
 
 app = FastAPI(
     title="RogersComcastBackend",
@@ -11,6 +11,9 @@ app = FastAPI(
 )
 
 app.include_router(users.router, prefix="/api/v1")
+app.include_router(api_endpoints.router, prefix="/api/v1")
+app.include_router(hub_endpoints.router, prefix="/api/v1")
+
 
 app.add_middleware(
     CORSMiddleware,

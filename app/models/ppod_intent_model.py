@@ -1,6 +1,7 @@
+import uuid
 from uuid import UUID as CORE_UUID
 
-from sqlalchemy import Column, DateTime, Integer, String, UUID, func, Text
+from sqlalchemy import Column, DateTime, Integer, Boolean, String, UUID, func, Text
 
 
 from app.models import Base
@@ -11,7 +12,8 @@ class PpodIntent(Base):
     __tablename__ = "ppod_intent"
 
     id = Column(Integer, primary_key=True, index=True)
-    ppod_intent_id = Column(UUID, nullable=False)
+    is_draft = Column(Boolean, default=True)
+    ppod_intent_id = Column(UUID, default=uuid.uuid4)
     ppod_intent_name = Column(String(255), nullable=False)
     cpod_intent_id = Column(UUID, nullable=True)
     ref_cpod_intent_id = Column(UUID, nullable=False)
@@ -73,11 +75,9 @@ class PpodIntent(Base):
     def from_schema(
         cls,
         schema: schemas.PpodIntentCreate | schemas.PpodIntentUpdate,
-        ppod_intent_id: CORE_UUID,
         cpod_intent_id: CORE_UUID = None,
     ) -> "PpodIntent":
         content = {
-            "ppod_intent_id": ppod_intent_id,
             "ppod_intent_name": schema.ppod_intent_name,
             "cpod_intent_id": cpod_intent_id,
             "ref_cpod_intent_id": schema.ref_cpod_intent_id,
@@ -233,6 +233,7 @@ class PpodIntent(Base):
     def to_schema(self) -> schemas.SiteIntentReturn:
         content = {
             "ppod_intent_id": self.ppod_intent_id,
+            "is_draft": self.is_draft,
             "cpod_intent_id": self.cpod_intent_id,
             "ppod_intent_name": self.ppod_intent_name,
             "ref_cpod_intent_name": self.ref_cpod_intent_name,

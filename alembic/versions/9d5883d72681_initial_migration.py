@@ -1,8 +1,8 @@
 """Initial migration
 
-Revision ID: 56df021fcb4f
+Revision ID: 9d5883d72681
 Revises: 
-Create Date: 2025-05-20 16:26:51.053965
+Create Date: 2025-05-20 20:37:46.840704
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '56df021fcb4f'
+revision: str = '9d5883d72681'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -36,7 +36,8 @@ def upgrade() -> None:
     op.create_index(op.f('ix_api_id'), 'api', ['id'], unique=False)
     op.create_table('hub',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('hub_id', sa.UUID(), nullable=False),
+    sa.Column('is_draft', sa.Boolean(), nullable=True),
+    sa.Column('hub_id', sa.UUID(), nullable=True),
     sa.Column('parent_hub_name', sa.String(length=255), nullable=False),
     sa.Column('ref_parent_hub_name', sa.String(length=255), nullable=False),
     sa.Column('ref_parent_hub_id', sa.UUID(), nullable=False),
@@ -65,7 +66,8 @@ def upgrade() -> None:
     op.create_index(op.f('ix_order_id'), 'order', ['id'], unique=False)
     op.create_table('ppod_intent',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('ppod_intent_id', sa.UUID(), nullable=False),
+    sa.Column('is_draft', sa.Boolean(), nullable=True),
+    sa.Column('ppod_intent_id', sa.UUID(), nullable=True),
     sa.Column('ppod_intent_name', sa.String(length=255), nullable=False),
     sa.Column('cpod_intent_id', sa.UUID(), nullable=True),
     sa.Column('ref_cpod_intent_id', sa.UUID(), nullable=False),
@@ -120,7 +122,8 @@ def upgrade() -> None:
     op.create_index(op.f('ix_ppod_intent_id'), 'ppod_intent', ['id'], unique=False)
     op.create_table('site_intent',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('site_intent_id', sa.UUID(), nullable=False),
+    sa.Column('is_draft', sa.Boolean(), nullable=True),
+    sa.Column('site_intent_id', sa.UUID(), nullable=True),
     sa.Column('site_intent_name', sa.String(length=255), nullable=False),
     sa.Column('ref_hub_name', sa.String(length=255), nullable=False),
     sa.Column('ref_hub_id', sa.UUID(), nullable=False),
