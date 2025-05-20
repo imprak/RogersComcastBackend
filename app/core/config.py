@@ -1,10 +1,11 @@
+import datetime
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class CommonSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file="../.env",
                                       env_file_encoding="utf-8")
-
 
 
 class AppSettings(CommonSettings):
@@ -14,14 +15,23 @@ class AppSettings(CommonSettings):
 
 
 class DbSettings(CommonSettings):
-    DB_HOST: str = "10.168.171.11"
-    DB_PORT: int = 3306
-    DB_USERNAME: str = "root"
-    DB_PASSWORD: str = "root"
-    DB_NAME: str = "rogers"
+    DB_HOST: str
+    DB_PORT: int
+    DB_USERNAME: str
+    DB_PASSWORD: str
+    DB_NAME: str
+
+class ComcastInfoSettings(CommonSettings):
+    COMCAST_AUTH_TOKEN_URL: str
+    COMCAST_AUTH_CLIENT_ID: str
+    COMCAST_AUTH_CLIENT_SECRET: str
+    COMCAST_AUTH_SCOPE: str
+    COMCAST_TOKEN: str | None = None
+    COMCAST_TOKEN_EXPIRES_AT: datetime = datetime.datetime.now()
+    COMCAST_SERVER_BASE_URL: str
 
 
-class Settings(DbSettings, AppSettings):
+class Settings(DbSettings, AppSettings, ComcastInfoSettings):
     pass
 
 

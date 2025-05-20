@@ -28,12 +28,16 @@ class HubBase(BaseModel):
 
 class HubCreate(HubBase):
     ref_parent_hub_name: str = Field(alias="refParentHubName")
-    ref_parent_hub_id: str = Field(alias="refParentHubId")
+    ref_parent_hub_id: UUID4 = Field(
+        examples=["554aab05-dd7f-44ec-be0c-749eb083505c"], alias="refParentHubId"
+    )
 
 
 class HubUpdate(HubBase):
     ref_parent_hub_name: str = Field(alias="refParentHubName")
-    ref_parent_hub_id: str = Field(alias="refParentHubId")
+    ref_parent_hub_id: UUID4 = Field(
+        examples=["554aab05-dd7f-44ec-be0c-749eb083505c"], alias="refParentHubId"
+    )
 
 
 class HubReturn(HubBase):

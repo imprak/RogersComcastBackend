@@ -2,12 +2,14 @@ import uuid
 
 from fastapi import APIRouter, Depends, Path, Query, status
 from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from app import schemas, models, log, cruds
 from app.dependencies.db_session import get_db
+from app.utils.comcast_integration import HubIntegration
 
-router = APIRouter(tags=["ISP APIs"])
+router = APIRouter(tags=["Hub APIs"])
 
 
 @router.post("/partners/{partnerId}/network/hub")
@@ -20,12 +22,12 @@ async def create(
 
     parent_hub_name = data_in.ref_parent_hub_name
     db_obj = cruds.hub_cruds.create(
-        db=db, data=data_in, parent_hub_name=parent_hub_name
+        db=db, data_in=data_in, parent_hub_name=parent_hub_name
     )
 
-    JSONResponse(
+    return JSONResponse(
         status_code=status.HTTP_201_CREATED,
-        content=db_obj.to_schema(),
+        content=jsonable_encoder(db_obj.to_schema()),
     )
 
 
@@ -40,7 +42,7 @@ def get_multi(
     db_objs = cruds.hub_cruds.get_multi(db=db, page=page, page_size=page_size)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content=[db_obj.to_schema() for db_obj in db_objs],
+        content=[jsonable_encoder(db_obj.to_schema()) for db_obj in db_objs],
     )
 
 
@@ -48,7 +50,7 @@ def get_multi(
 def delete(
     partner_id: str = Path(alias="partnerId"),
     client_id: str = Query(None, alias="clientId"),
-    hub_id: str = Query(alias="hubId"),
+    hub_id: uuid.UUID = Query(alias="hubId"),
     db: Session = Depends(get_db),
 ):
     db_obj = cruds.hub_cruds.get_by_hub_id(db=db, hub_id=hub_id)
@@ -58,19 +60,23 @@ def delete(
             status_code=status.HTTP_404_NOT_FOUND,
             content={"message": "not found"},
         )
+
+    if not db_obj.is_draft:
+        HubIntegration(partner_id=partner_id).delete(hub_id=hub_id)
+
     cruds.hub_cruds.delete(db=db, db_obj=db_obj)
 
     return status.HTTP_204_NO_CONTENT
 
 
-@router.put("/partners/{partnerId}/network/hub/{hubId}/launch")
-def launch_to_comcast(
+@router.put("/partners/{partnerId}/network/hub/{hubId}:push")
+def push_to_comcast(
     partner_id: str = Path(alias="partnerId"),
     client_id: str = Query(None, alias="clientId"),
-    hub_id: str = Query(alias="hubId"),
+    hub_id: uuid.UUID = Query(alias="hubId"),
     db: Session = Depends(get_db),
 ):
-    db_obj = cruds.hub_cruds.get(db=db, hub_id=hub_id)
+    db_obj = cruds.hub_cruds.get_by_hub_id(db=db, hub_id=hub_id)
 
     if not db_obj:
         return JSONResponse(
@@ -78,10 +84,12 @@ def launch_to_comcast(
             content={"message": "not found"},
         )
 
-    hub_id = hub_id
-    db_obj = cruds.hub_cruds.launch(db=db, hub_id=hub_id)
+    comcast_response = HubIntegration(partner_id=partner_id).create(db_obj)
+    db_obj = cruds.hub_cruds.push(
+        db=db, db_obj=db_obj, hub_id=comcast_response.get("hub_id")
+    )
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content=db_obj.to_schema(),
+        content=jsonable_encoder(db_obj.to_schema()),
     )

@@ -37,7 +37,7 @@ class HubCrud:
         db.commit()
 
     @staticmethod
-    def launch(db: Session, db_obj: models.Hub, hub_id) -> models.Hub:
+    def push(db: Session, db_obj: models.Hub, hub_id) -> models.Hub:
         db_obj.hub_id = hub_id
         db_obj.is_draft = False
         db.commit()

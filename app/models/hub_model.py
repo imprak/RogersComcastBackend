@@ -12,7 +12,7 @@ class Hub(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     is_draft = Column(Boolean, default=True)
-    hub_id = Column(UUID, default=uuid.uuid4)
+    hub_id = Column(UUID, default=uuid.uuid4())
     parent_hub_name = Column(String(255), nullable=False)
     ref_parent_hub_name = Column(String(255), nullable=False)
     ref_parent_hub_id = Column(UUID, nullable=False)
