@@ -17,13 +17,13 @@ ENV PYTHONUNBUFFERED=1
 # especially for projects that are testing compatibility with
 # multiple versions of dependencies
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
-
+ENV POETRY_VIRTUALENVS_CREATE=false
 
 WORKDIR /usr/src/app
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
 COPY poetry.lock pyproject.toml /usr/src/app/
-RUN pip install poetry && poetry install
+RUN pip install poetry && poetry install --no-root
 
 # Create a non-privileged user that the app will run under.
 ARG UID=10001

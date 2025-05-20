@@ -1,5 +1,5 @@
 #!/bin/bash
-./scripts/wait-for-db.sh
+#./scripts/wait-for-db.sh
 
 # Run Alembic migrations
 echo "Running Alembic migrations..."
