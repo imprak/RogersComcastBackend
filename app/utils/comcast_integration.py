@@ -49,7 +49,7 @@ class IntegrationBase:
     def make_http_call(url, method: str, data: dict | None = None):
         headers = {
             "Authorization": f"Bearer {settings.COMCAST_TOKEN}",
-            "X-Request-ID": "test_pra",
+            "X-Request-ID": str(uuid.uuid4()),
         }
         response = requests.request(
             method=method, url=url, headers=headers, json=data, verify=False
