@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app import schemas, models, log, cruds
 from app.dependencies.db_session import get_db
 from app.utils import comcast_integration
+from app.core import exceptions
 
 router = APIRouter(tags=["Ppod Intent APIs"])
 
@@ -65,9 +66,22 @@ def delete(
 
     if not db_obj.is_draft:
         log.info(f"Deleting the ppod intent {ppod_intent_id} over comcast")
-        comcast_integration.PpodIntentIntegration(partner_id=partner_id).delete(
-            ppod_intent_id=ppod_intent_id
-        )
+        try:
+            comcast_integration.PpodIntentIntegration(partner_id=partner_id).delete(
+                ppod_intent_id=ppod_intent_id
+            )
+        except exceptions.NotFoundError as err:
+            log.error(err)
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"message": str(err)},
+            )
+        except Exception as err:
+            log.error(err)
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"message": str(err)},
+            )
 
     cruds.ppod_intent_cruds.delete(db=db, db_obj=db_obj)
 
@@ -111,9 +125,22 @@ def push_to_comcast(
 
     log.info(comcast_input)
 
-    comcast_response = comcast_integration.PpodIntentIntegration(
-        partner_id=partner_id
-    ).create(data=comcast_input)
+    try:
+        comcast_response = comcast_integration.PpodIntentIntegration(
+            partner_id=partner_id
+        ).create(data=comcast_input)
+    except exceptions.NotFoundError as err:
+        log.error(err)
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"message": str(err)},
+        )
+    except Exception as err:
+        log.error(err)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": str(err)},
+        )
 
     db_obj = cruds.ppod_intent_cruds.push(
         db=db,

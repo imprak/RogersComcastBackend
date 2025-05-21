@@ -3,6 +3,7 @@ import datetime
 import requests
 
 from app.core.config import settings
+from app.core import exceptions
 from app import log
 
 
@@ -53,6 +54,10 @@ class IntegrationBase:
         response = requests.request(
             method=method, url=url, headers=headers, json=data, verify=False
         )
+
+        if response.status_code == 404:
+            raise exceptions.NotFoundError(f"Not found error: {response.json()}")
+
         return response
 
 
