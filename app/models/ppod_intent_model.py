@@ -13,7 +13,7 @@ class PpodIntent(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     is_draft = Column(Boolean, default=True)
-    ppod_intent_id = Column(UUID, default=uuid.uuid4)
+    ppod_intent_id = Column(UUID, default=uuid.uuid4())
     ppod_intent_name = Column(String(255), nullable=False)
     cpod_intent_id = Column(UUID, nullable=True)
     ref_cpod_intent_id = Column(UUID, nullable=False)
@@ -74,12 +74,10 @@ class PpodIntent(Base):
     @classmethod
     def from_schema(
         cls,
-        schema: schemas.PpodIntentCreate | schemas.PpodIntentUpdate,
-        cpod_intent_id: CORE_UUID = None,
+        schema: schemas.PpodIntentCreate,
     ) -> "PpodIntent":
         content = {
             "ppod_intent_name": schema.ppod_intent_name,
-            "cpod_intent_id": cpod_intent_id,
             "ref_cpod_intent_id": schema.ref_cpod_intent_id,
             "ref_cpod_intent_name": schema.ref_cpod_intent_name,
             "ref_scn_profile_id": schema.ref_scn_profile_id,

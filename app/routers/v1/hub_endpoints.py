@@ -84,6 +84,13 @@ def push_to_comcast(
             content={"message": "not found"},
         )
 
+    if not db_obj.is_draft:
+        err = f"Site intent id {hub_id} already pushed to comcast"
+        log.error(err)
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT, content={"message": err}
+        )
+
     comcast_response = HubIntegration(partner_id=partner_id).create(db_obj)
     db_obj = cruds.hub_cruds.push(
         db=db, db_obj=db_obj, hub_id=comcast_response.get("hub_id")

@@ -7,6 +7,9 @@ class CommonSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file="../.env",
                                       env_file_encoding="utf-8")
 
+class LoggerInfo(CommonSettings):
+    LOGGER_FORMAT: str = "[%(asctime)s] [%(levelname)s] [{}] [{}] [%(filename)s -> %(funcName)s()] [%(lineno)s] %(message)s"
+
 
 class AppSettings(CommonSettings):
     APP_NAME: str = "RogersComcastBackend"
@@ -31,7 +34,7 @@ class ComcastInfoSettings(CommonSettings):
     COMCAST_SERVER_BASE_URL: str
 
 
-class Settings(DbSettings, AppSettings, ComcastInfoSettings):
+class Settings(DbSettings, AppSettings, ComcastInfoSettings, LoggerInfo):
     pass
 
 

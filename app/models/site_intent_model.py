@@ -1,5 +1,4 @@
 import uuid
-from uuid import UUID as CORE_UUID
 
 from sqlalchemy import Column, DateTime, Integer, Boolean, String, UUID, func, Text
 
@@ -12,7 +11,7 @@ class SiteIntent(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     is_draft = Column(Boolean, default=True)
-    site_intent_id = Column(UUID, default=uuid.uuid4)
+    site_intent_id = Column(UUID, default=uuid.uuid4())
     site_intent_name = Column(String(255), nullable=False)
     ref_hub_name = Column(String(255), nullable=False)
     ref_hub_id = Column(UUID, nullable=False)
@@ -31,9 +30,7 @@ class SiteIntent(Base):
     updated_at = Column(DateTime(timezone=True), default=func.utc_timestamp())
 
     @classmethod
-    def from_schema(
-        cls, schema: schemas.SiteIntentCreate, site_intent_id: CORE_UUID
-    ) -> "SiteIntent":
+    def from_schema(cls, schema: schemas.SiteIntentCreate) -> "SiteIntent":
         content = {
             "site_intent_name": schema.site_intent_name,
             "ref_hub_name": schema.ref_hub_name,

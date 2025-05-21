@@ -46,8 +46,13 @@ class IntegrationBase:
 
     @staticmethod
     def make_http_call(url, method: str, data: dict | None = None):
-        headers = {"Authorization": f"Bearer {settings.COMCAST_TOKEN}"}
-        response = requests.request(method=method, url=url, headers=headers, json=data)
+        headers = {
+            "Authorization": f"Bearer {settings.COMCAST_TOKEN}",
+            "X-Request-ID": "test_pra",
+        }
+        response = requests.request(
+            method=method, url=url, headers=headers, json=data, verify=False
+        )
         return response
 
 
@@ -74,32 +79,31 @@ class SiteIntentIntegration(IntegrationBase):
     def create(self, data: dict) -> dict:
         response = self.make_http_call(url=self.url, method="POST", data=data)
         if response not in [200, 201]:
-            log.error(f"Failed to create site intent: {response.text}")
-            raise ComcastIntegrationException(
-                f"Failed to create site intent: {response.text}"
-            )
-
+            err = f"Failed to create site intent: {response.text}"
+            log.error(err)
+            raise ComcastIntegrationException(err)
+        log.info(f"Site intent record created over comcast platform")
         return response.json()
 
     def update(self, site_intent_id: uuid.UUID) -> dict:
         url = self.url + f"/{site_intent_id}"
         response = self.make_http_call(url=url, method="PUT")
         if response not in [200, 201]:
-            log.error(f"Failed to update site intent: {response.text}")
-            raise ComcastIntegrationException(
-                f"Failed to update site intent: {response.text}"
-            )
-
+            err = f"Failed to update site intent: {response.text}"
+            log.error(err)
+            raise ComcastIntegrationException(err)
+        log.info(f"Site intent {site_intent_id} updated over comcast platform")
         return response.json()
 
     def delete(self, site_intent_id: uuid.UUID) -> None:
         url = self.url + f"/{site_intent_id}"
         response = self.make_http_call(url=url, method="DELETE")
         if response not in [200, 204]:
-            log.error(f"Failed to delete site intent: {response.text}")
-            raise ComcastIntegrationException(
-                f"Failed to delete site intent: {response.text}"
-            )
+            err = f"Failed to delete site intent: {response.text}"
+            log.error(err)
+            raise ComcastIntegrationException(err)
+
+        log.info(f"Site intent {site_intent_id} deleted over comcast platform")
 
 
 class PpodIntentIntegration(IntegrationBase):
@@ -110,29 +114,30 @@ class PpodIntentIntegration(IntegrationBase):
     def create(self, data: dict) -> dict:
         response = self.make_http_call(url=self.url, method="POST", data=data)
         if response not in [200, 201]:
-            log.error(f"Failed to create ppod intent: {response.text}")
-            raise ComcastIntegrationException(
-                f"Failed to create ppod intent: {response.text}"
-            )
+            err = f"Failed to create ppod intent: {response.text}"
+            log.error(err)
+            raise ComcastIntegrationException(err)
 
+        log.info(f"Ppod intent record created over comcast platform")
         return response.json()
 
     def update(self, ppod_intent_id: uuid.UUID) -> dict:
         url = self.url + f"/{ppod_intent_id}"
         response = self.make_http_call(url=url, method="PUT")
         if response not in [200, 201]:
-            log.error(f"Failed to update ppod intent: {response.text}")
-            raise ComcastIntegrationException(
-                f"Failed to update ppod intent: {response.text}"
-            )
+            err = f"Failed to update ppod intent: {response.text}"
+            log.error(err)
+            raise ComcastIntegrationException(err)
 
+        log.info(f"Ppod intent {ppod_intent_id} updated over comcast platform")
         return response.json()
 
     def delete(self, ppod_intent_id: uuid.UUID) -> None:
         url = self.url + f"/{ppod_intent_id}"
         response = self.make_http_call(url=url, method="DELETE")
         if response not in [200, 204]:
-            log.error(f"Failed to delete ppod intent: {response.text}")
-            raise ComcastIntegrationException(
-                f"Failed to delete ppod intent: {response.text}"
-            )
+            err = f"Failed to delete ppod intent: {response.text}"
+            log.error(err)
+            raise ComcastIntegrationException(err)
+
+        log.info(f"Ppod intent {ppod_intent_id} deleted over comcast platform")
