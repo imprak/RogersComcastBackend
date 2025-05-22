@@ -12,10 +12,10 @@ class Api(Base):
     api_id = Column(UUID, nullable=False)
     api_name = Column(String(255), nullable=False)
     api_category = Column(String(255), nullable=False)
-    comment = Column(Text(), nullable=False)
+    comment = Column(Text(), nullable=True)
 
-    created_by = Column(String(255), nullable=False)
-    updated_by = Column(String(255), nullable=False)
+    created_by = Column(String(255), nullable=True)
+    updated_by = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), default=func.utc_timestamp())
     updated_at = Column(DateTime(timezone=True), default=func.utc_timestamp())
 

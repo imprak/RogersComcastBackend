@@ -1,7 +1,15 @@
-import uuid
-from uuid import UUID as CORE_UUID
-
-from sqlalchemy import Column, DateTime, Integer, Boolean, String, UUID, func, Text
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Integer,
+    Boolean,
+    String,
+    UUID,
+    func,
+    Text,
+    ForeignKey,
+)
+from sqlalchemy.orm import relationship
 
 from app.models import Base
 from app import schemas
@@ -12,7 +20,7 @@ class Hub(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     is_draft = Column(Boolean, default=True)
-    hub_id = Column(UUID, default=uuid.uuid4())
+    hub_id = Column(UUID, unique=True)
     parent_hub_name = Column(String(255), nullable=False)
     ref_parent_hub_name = Column(String(255), nullable=False)
     ref_parent_hub_id = Column(UUID, nullable=False)
@@ -20,17 +28,32 @@ class Hub(Base):
     hub_type = Column(String(255), nullable=False)
     ref_buhm_id = Column(UUID, nullable=False)
     ref_buhm_name = Column(String(255), nullable=False)
-    postal_address = Column(Text(), nullable=False)
-    timezone = Column(String(255), nullable=False)
+    postal_address = Column(Text(), nullable=True)
+    timezone = Column(String(255), nullable=True)
+    transaction_id = Column(
+        UUID, ForeignKey("transaction.transaction_id"), nullable=False
+    )
+    order_id = Column(UUID, ForeignKey("order.order_id"), nullable=True)
 
-    created_by = Column(String(255), nullable=False)
-    updated_by = Column(String(255), nullable=False)
+    created_by = Column(String(255), nullable=True)
+    updated_by = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), default=func.utc_timestamp())
     updated_at = Column(DateTime(timezone=True), default=func.utc_timestamp())
 
+    transaction = relationship("Transaction", back_populates="hub")  # ORM relationship
+    order = relationship("Order", back_populates="hubs")  # ORM relationship
+
     @classmethod
-    def from_schema(cls, schema: schemas.HubCreate, parent_hub_name: str) -> "Hub":
+    def from_schema(
+        cls,
+        schema: schemas.HubCreate,
+        parent_hub_name: str,
+        transaction_id: str,
+        hub_id,
+        order_id: str | None = None,
+    ) -> "Hub":
         content = {
+            "hub_id": hub_id,
             "parent_hub_name": parent_hub_name,
             "ref_parent_hub_name": schema.ref_parent_hub_name,
             "ref_parent_hub_id": schema.ref_parent_hub_id,
@@ -42,6 +65,8 @@ class Hub(Base):
             "timezone": schema.timezone,
             "updated_by": schema.created_by,
             "created_by": schema.created_by,
+            "transaction_id": transaction_id,
+            "order_id": order_id,
         }
 
         return cls(**content)
@@ -60,6 +85,8 @@ class Hub(Base):
             "updated_by": self.updated_by,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
+            "transaction_id": self.transaction_id,
+            "order_id": self.order_id,
         }
         if self.postal_address:
             content.update(

@@ -7,6 +7,8 @@ from app.routers.v1 import (
     hub_endpoints,
     site_intent_endpoints,
     ppod_intent_endpoints,
+    transaction_endpoints,
+    order_endpoints,
 )
 
 app = FastAPI(
@@ -19,6 +21,8 @@ app.include_router(api_endpoints.router, prefix="/api/v1")
 app.include_router(hub_endpoints.router, prefix="/api/v1")
 app.include_router(site_intent_endpoints.router, prefix="/api/v1")
 app.include_router(ppod_intent_endpoints.router, prefix="/api/v1")
+app.include_router(transaction_endpoints.router, prefix="/api/v1")
+app.include_router(order_endpoints.router, prefix="/api/v1")
 
 
 app.add_middleware(

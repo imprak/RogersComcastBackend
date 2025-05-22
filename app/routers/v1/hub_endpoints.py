@@ -1,6 +1,8 @@
+import io
+import os
 import uuid
 
-from fastapi import APIRouter, Depends, Path, Query, status
+from fastapi import APIRouter, Depends, Path, Query, status, UploadFile, File
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
@@ -8,6 +10,8 @@ from sqlalchemy.orm import Session
 from app import schemas, models, log, cruds
 from app.dependencies.db_session import get_db
 from app.utils.comcast_integration import HubIntegration
+from app.core import enums
+from app.core.config import settings
 
 router = APIRouter(tags=["Hub APIs"])
 
@@ -19,10 +23,27 @@ async def create(
     client_id: str = Query(None, alias="clientId"),
     db: Session = Depends(get_db),
 ):
+    transaction_id = uuid.uuid4()
+    transaction_create_data = schemas.TransactionCreate.model_validate(
+        {
+            "transaction_status": enums.TransactionStatus.COMPLETED,
+            "transaction_type": enums.TransactionType.SINGLE,
+            "message": "na",
+        },
+        by_name=True,
+    )
+    db_ob_transaction = cruds.transaction_cruds.create(
+        db=db, data_in=transaction_create_data, transaction_id=transaction_id
+    )
 
     parent_hub_name = data_in.ref_parent_hub_name
+    hub_id = uuid.uuid4()
     db_obj = cruds.hub_cruds.create(
-        db=db, data_in=data_in, parent_hub_name=parent_hub_name
+        db=db,
+        data_in=data_in,
+        parent_hub_name=parent_hub_name,
+        transaction_id=db_ob_transaction.transaction_id,
+        hub_id=hub_id,
     )
 
     return JSONResponse(
@@ -99,4 +120,58 @@ def push_to_comcast(
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=jsonable_encoder(db_obj.to_schema()),
+    )
+
+
+@router.post("/partners/{partnerId}/network/hub/upload-order")
+async def upload_order(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    if not file.filename.endswith(".csv"):
+        err = "Un supported file format"
+        log.error(err)
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST, content={"message": err}
+        )
+
+    content = await file.read()
+    order_id = uuid.uuid4()
+
+    os.makedirs(settings.ORDER_STORAGE_PATH, exist_ok=True)
+    file_name = f"{order_id}.csv"
+    full_file_path = f"{settings.ORDER_STORAGE_PATH}/{file_name}"
+
+    with open(full_file_path, "w+") as f:
+        f.write(content.decode("utf-8"))
+
+    transaction_id = uuid.uuid4()
+    transaction_create_data = schemas.TransactionCreate.model_validate(
+        {
+            "transaction_status": enums.TransactionStatus.IN_PROGRESS,
+            "transaction_type": enums.TransactionType.BULK,
+            "message": "under validation",
+        },
+        by_name=True,
+    )
+    db_ob_transaction = cruds.transaction_cruds.create(
+        db=db, data_in=transaction_create_data, transaction_id=transaction_id
+    )
+
+    order_create_data = schemas.OrderCreate.model_validate(
+        {
+            "file_name": file_name,
+            "transaction_id": db_ob_transaction.transaction_id,
+            "order_status": enums.OrderStatus.IN_PROGRESS,
+            "message": "under validation",
+        },
+        by_name=True,
+    )
+    db_obj_order = cruds.order_cruds.create(
+        db=db, data_in=order_create_data, order_id=order_id
+    )
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=jsonable_encoder(db_obj_order.to_schema()),
     )

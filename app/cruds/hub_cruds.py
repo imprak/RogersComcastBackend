@@ -5,8 +5,15 @@ from app import schemas, models
 
 class HubCrud:
     @staticmethod
-    def create(db: Session, data_in: schemas.HubCreate, parent_hub_name) -> models.Hub:
-        db_obj = models.Hub.from_schema(schema=data_in, parent_hub_name=parent_hub_name)
+    def create(
+        db: Session, data_in: schemas.HubCreate, parent_hub_name, transaction_id, hub_id
+    ) -> models.Hub:
+        db_obj = models.Hub.from_schema(
+            schema=data_in,
+            parent_hub_name=parent_hub_name,
+            transaction_id=transaction_id,
+            hub_id=hub_id,
+        )
         db.add(db_obj)
         db.commit()
 

@@ -1,8 +1,8 @@
-"""Initial migration
+"""first revision
 
-Revision ID: 9d5883d72681
+Revision ID: 148f282a9ad4
 Revises: 
-Create Date: 2025-05-20 20:37:46.840704
+Create Date: 2025-05-22 19:24:05.080531
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '9d5883d72681'
+revision: str = '148f282a9ad4'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -26,44 +26,14 @@ def upgrade() -> None:
     sa.Column('api_id', sa.UUID(), nullable=False),
     sa.Column('api_name', sa.String(length=255), nullable=False),
     sa.Column('api_category', sa.String(length=255), nullable=False),
-    sa.Column('comment', sa.Text(), nullable=False),
-    sa.Column('created_by', sa.String(length=255), nullable=False),
-    sa.Column('updated_by', sa.String(length=255), nullable=False),
+    sa.Column('comment', sa.Text(), nullable=True),
+    sa.Column('created_by', sa.String(length=255), nullable=True),
+    sa.Column('updated_by', sa.String(length=255), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_api_id'), 'api', ['id'], unique=False)
-    op.create_table('hub',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('is_draft', sa.Boolean(), nullable=True),
-    sa.Column('hub_id', sa.UUID(), nullable=True),
-    sa.Column('parent_hub_name', sa.String(length=255), nullable=False),
-    sa.Column('ref_parent_hub_name', sa.String(length=255), nullable=False),
-    sa.Column('ref_parent_hub_id', sa.UUID(), nullable=False),
-    sa.Column('hub_name', sa.String(length=255), nullable=False),
-    sa.Column('hub_type', sa.String(length=255), nullable=False),
-    sa.Column('ref_buhm_id', sa.UUID(), nullable=False),
-    sa.Column('ref_buhm_name', sa.String(length=255), nullable=False),
-    sa.Column('postal_address', sa.Text(), nullable=False),
-    sa.Column('timezone', sa.String(length=255), nullable=False),
-    sa.Column('created_by', sa.String(length=255), nullable=False),
-    sa.Column('updated_by', sa.String(length=255), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_hub_id'), 'hub', ['id'], unique=False)
-    op.create_table('order',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('order_id', sa.UUID(), nullable=False),
-    sa.Column('created_by', sa.String(length=255), nullable=False),
-    sa.Column('updated_by', sa.String(length=255), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_order_id'), 'order', ['id'], unique=False)
     op.create_table('ppod_intent',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('is_draft', sa.Boolean(), nullable=True),
@@ -147,29 +117,71 @@ def upgrade() -> None:
     sa.Column('transaction_status', sa.Enum('IN_PROGRESS', 'COMPLETED', 'FAILED', name='transactionstatus'), nullable=False),
     sa.Column('transaction_type', sa.Enum('SINGLE', 'BULK', name='transactiontype'), nullable=False),
     sa.Column('message', sa.Text(), nullable=True),
-    sa.Column('created_by', sa.String(length=255), nullable=False),
-    sa.Column('updated_by', sa.String(length=255), nullable=False),
+    sa.Column('created_by', sa.String(length=255), nullable=True),
+    sa.Column('updated_by', sa.String(length=255), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('transaction_id')
     )
     op.create_index(op.f('ix_transaction_id'), 'transaction', ['id'], unique=False)
+    op.create_table('order',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('order_id', sa.UUID(), nullable=False),
+    sa.Column('file_name', sa.String(length=255), nullable=False),
+    sa.Column('order_status', sa.Enum('IN_PROGRESS', 'COMPLETED', 'FAILED', name='transactionstatus'), nullable=False),
+    sa.Column('message', sa.String(length=255), nullable=True),
+    sa.Column('created_by', sa.String(length=255), nullable=True),
+    sa.Column('updated_by', sa.String(length=255), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('transaction_id', sa.UUID(), nullable=True),
+    sa.ForeignKeyConstraint(['transaction_id'], ['transaction.transaction_id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('order_id')
+    )
+    op.create_index(op.f('ix_order_id'), 'order', ['id'], unique=False)
+    op.create_table('hub',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('is_draft', sa.Boolean(), nullable=True),
+    sa.Column('hub_id', sa.UUID(), nullable=True),
+    sa.Column('parent_hub_name', sa.String(length=255), nullable=False),
+    sa.Column('ref_parent_hub_name', sa.String(length=255), nullable=False),
+    sa.Column('ref_parent_hub_id', sa.UUID(), nullable=False),
+    sa.Column('hub_name', sa.String(length=255), nullable=False),
+    sa.Column('hub_type', sa.String(length=255), nullable=False),
+    sa.Column('ref_buhm_id', sa.UUID(), nullable=False),
+    sa.Column('ref_buhm_name', sa.String(length=255), nullable=False),
+    sa.Column('postal_address', sa.Text(), nullable=True),
+    sa.Column('timezone', sa.String(length=255), nullable=True),
+    sa.Column('transaction_id', sa.UUID(), nullable=True),
+    sa.Column('order_id', sa.UUID(), nullable=True),
+    sa.Column('created_by', sa.String(length=255), nullable=True),
+    sa.Column('updated_by', sa.String(length=255), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+    sa.ForeignKeyConstraint(['order_id'], ['order.order_id'], ),
+    sa.ForeignKeyConstraint(['transaction_id'], ['transaction.transaction_id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('hub_id')
+    )
+    op.create_index(op.f('ix_hub_id'), 'hub', ['id'], unique=False)
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(op.f('ix_hub_id'), table_name='hub')
+    op.drop_table('hub')
+    op.drop_index(op.f('ix_order_id'), table_name='order')
+    op.drop_table('order')
     op.drop_index(op.f('ix_transaction_id'), table_name='transaction')
     op.drop_table('transaction')
     op.drop_index(op.f('ix_site_intent_id'), table_name='site_intent')
     op.drop_table('site_intent')
     op.drop_index(op.f('ix_ppod_intent_id'), table_name='ppod_intent')
     op.drop_table('ppod_intent')
-    op.drop_index(op.f('ix_order_id'), table_name='order')
-    op.drop_table('order')
-    op.drop_index(op.f('ix_hub_id'), table_name='hub')
-    op.drop_table('hub')
     op.drop_index(op.f('ix_api_id'), table_name='api')
     op.drop_table('api')
     # ### end Alembic commands ###

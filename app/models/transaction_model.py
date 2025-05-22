@@ -1,5 +1,6 @@
-from uuid import UUID as CORE_UUID
+import uuid
 from sqlalchemy import Column, DateTime, Integer, String, func, Text, UUID, Enum
+from sqlalchemy.orm import relationship
 
 from app.core import enums
 from app.models import Base
@@ -10,19 +11,22 @@ class Transaction(Base):
     __tablename__ = "transaction"
 
     id = Column(Integer, primary_key=True, index=True)
-    transaction_id = Column(UUID, nullable=False)
+    transaction_id = Column(UUID, nullable=False, unique=True)
     transaction_status = Column(Enum(enums.TransactionStatus), nullable=False)
     transaction_type = Column(Enum(enums.TransactionType), nullable=False)
     message = Column(Text(), nullable=True)
 
-    created_by = Column(String(255), nullable=False)
-    updated_by = Column(String(255), nullable=False)
+    created_by = Column(String(255), nullable=True)
+    updated_by = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), default=func.utc_timestamp())
     updated_at = Column(DateTime(timezone=True), default=func.utc_timestamp())
 
+    hub = relationship("Hub", back_populates="transaction")
+    order = relationship("Order", back_populates="transaction")
+
     @classmethod
     def from_schema(
-        cls, schema: schemas.TransactionCreate, transaction_id: CORE_UUID
+        cls, schema: schemas.TransactionCreate, transaction_id
     ) -> "Transaction":
         return cls(
             **{

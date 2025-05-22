@@ -10,3 +10,9 @@ class TransactionStatus(str, Enum):
 class TransactionType(str, Enum):
     SINGLE = "single"
     BULK = "bulk"
+
+
+class OrderStatus(str, Enum):
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"

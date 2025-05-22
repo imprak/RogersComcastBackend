@@ -22,7 +22,7 @@ class ApiUpdate(ApiBase):
 
 class ApiReturn(ApiBase):
     api_id: UUID4 = Field(alias="apiId")
-    created_by: str = Field(alias="createdBy")
-    updated_by: str = Field(alias="updatedBy")
+    created_by: str | None = Field(None, alias="createdBy")
+    updated_by: str | None = Field(None, alias="updatedBy")
     created_at: datetime = Field(alias="createdAt")
     updated_at: datetime = Field(alias="updatedAt")

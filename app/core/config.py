@@ -15,6 +15,7 @@ class AppSettings(CommonSettings):
     APP_NAME: str = "RogersComcastBackend"
     APP_VERSION: str = "0.1.0"
     ENVIRONMENT: str = "development"
+    ORDER_STORAGE_PATH: str
 
 
 class DbSettings(CommonSettings):
@@ -31,7 +32,7 @@ class ComcastInfoSettings(CommonSettings):
     COMCAST_AUTH_SCOPE: str
     COMCAST_TOKEN: str | None = None
     COMCAST_TOKEN_EXPIRES_AT: datetime = datetime.datetime.now()
-    COMCAST_SERVER_BASE_URL: str
+    COMCAST_SERVER_BASE_URL: str = ""
 
 
 class Settings(DbSettings, AppSettings, ComcastInfoSettings, LoggerInfo):

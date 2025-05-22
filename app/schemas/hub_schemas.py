@@ -46,7 +46,10 @@ class HubReturn(HubBase):
     )
     parent_hub_name: str = Field(alias="parentHubName")
     is_draft: bool = Field(True, alias="isDraft")
-    created_by: str = Field(alias="createdBy")
-    updated_by: str = Field(alias="updatedBy")
+    created_by: str | None = Field(None, alias="createdBy")
+    updated_by: str | None = Field(None, alias="updatedBy")
     created_at: datetime = Field(alias="createdAt")
     updated_at: datetime = Field(alias="updatedAt")
+
+    transaction_id: UUID4 = Field(alias="transactionId")
+    order_id: str | None = Field(None, alias="orderId")
