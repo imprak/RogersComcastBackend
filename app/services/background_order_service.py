@@ -81,11 +81,15 @@ def trigger_order_validation():
                 f"Fetched {len(order_validation.db_obj_orders)} orders to validate"
             )
             for db_obj_order in order_validation.db_obj_orders:
-                order_validation.validate_orders(db_obj_order)
+                try:
+                    order_validation.validate_orders(db_obj_order)
+                except Exception as err:
+                    log.error(
+                        f"Error occurred while validating the order {str(db_obj_order.order_id)}: {str(err)}"
+                    )
+                    continue
         except Exception as err:
-            log.error(
-                f"Error occurred while validating the order attachment: {str(err)}"
-            )
+            log.error(f"Error occurred while validating the orders: {str(err)}")
         finally:
             if db:
                 db.close()
