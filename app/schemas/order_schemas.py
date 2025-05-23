@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field, UUID4
+from pydantic import BaseModel, Field, UUID4, field_validator
 
 from app.core import enums
 
@@ -26,8 +26,13 @@ class OrderUpdate(OrderBase):
 
 class OrderReturn(OrderBase):
     order_id: UUID4 = Field(alias="orderId")
+    hubs: int = Field(default=0)
 
     created_by: str | None = Field(None, alias="createdBy")
     updated_by: str | None = Field(None, alias="updatedBy")
     created_at: datetime = Field(alias="createdAt")
     updated_at: datetime = Field(alias="updatedAt")
+
+    @field_validator("hubs", mode="before")
+    def get_hub_count(cls, v: list):
+        return len(v)

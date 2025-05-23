@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
+import threading
 
 from app.routers.v1 import (
     api_endpoints,
@@ -10,6 +11,9 @@ from app.routers.v1 import (
     transaction_endpoints,
     order_endpoints,
 )
+from app.services.background_order_service import trigger_order_validation
+
+threading.Thread(target=trigger_order_validation).start()
 
 app = FastAPI(
     title="RogersComcastBackend",

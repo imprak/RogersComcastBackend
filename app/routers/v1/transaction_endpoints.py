@@ -34,7 +34,9 @@ async def get(
     transaction_id: uuid.UUID = Path(alias="transactionId"),
     db: Session = Depends(get_db),
 ):
-    db_obj = cruds.transaction_cruds.get(db=db, transaction_id=transaction_id)
+    db_obj = cruds.transaction_cruds.get_by_transaction_id(
+        db=db, transaction_id=transaction_id
+    )
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,

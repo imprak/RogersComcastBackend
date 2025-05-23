@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app import schemas, models
+from app.core import enums
 
 
 class OrderCrud:
@@ -24,6 +25,19 @@ class OrderCrud:
     def get_multi(db: Session, page=1, page_size=10) -> list:
         offset = (page - 1) * page_size
         db_objs = db.query(models.Order).offset(offset).limit(page_size).all()
+
+        return db_objs
+
+    @staticmethod
+    def get_multi_in_progress(db: Session, page=1, page_size=10):
+        offset = (page - 1) * page_size
+        db_objs = (
+            db.query(models.Order)
+            .filter(models.Order.order_status == enums.OrderStatus.IN_PROGRESS)
+            .offset(offset)
+            .limit(page_size)
+            .all()
+        )
 
         return db_objs
 

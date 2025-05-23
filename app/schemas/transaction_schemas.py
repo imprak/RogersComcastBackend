@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field, UUID4
+from pydantic import BaseModel, Field, UUID4, model_validator
 
 from app.core import enums
 
@@ -22,7 +22,7 @@ class TransactionUpdate(TransactionBase):
     pass
 
 
-class TransactionReturn(BaseModel):
+class TransactionReturn(TransactionBase):
     transaction_id: UUID4 = Field(alias="transactionId")
 
     created_by: str | None = Field(None, alias="createdBy")

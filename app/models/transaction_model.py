@@ -35,7 +35,7 @@ class Transaction(Base):
                 "transaction_type": schema.transaction_type,
                 "message": schema.message,
                 "created_by": schema.created_by,
-                "created_at": schema.created_by,
+                "updated_by": schema.created_by,
             }
         )
 

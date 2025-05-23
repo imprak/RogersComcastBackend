@@ -6,13 +6,19 @@ from app import schemas, models
 class HubCrud:
     @staticmethod
     def create(
-        db: Session, data_in: schemas.HubCreate, parent_hub_name, transaction_id, hub_id
+        db: Session,
+        data_in: schemas.HubCreate,
+        parent_hub_name,
+        transaction_id,
+        hub_id,
+        order_id=None,
     ) -> models.Hub:
         db_obj = models.Hub.from_schema(
             schema=data_in,
             parent_hub_name=parent_hub_name,
             transaction_id=transaction_id,
             hub_id=hub_id,
+            order_id=order_id,
         )
         db.add(db_obj)
         db.commit()

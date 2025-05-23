@@ -54,6 +54,8 @@ class Hub(Base):
     ) -> "Hub":
         content = {
             "hub_id": hub_id,
+            "transaction_id": transaction_id,
+            "order_id": order_id,
             "parent_hub_name": parent_hub_name,
             "ref_parent_hub_name": schema.ref_parent_hub_name,
             "ref_parent_hub_id": schema.ref_parent_hub_id,
@@ -61,12 +63,14 @@ class Hub(Base):
             "hub_type": schema.hub_type,
             "ref_buhm_id": schema.ref_buhm_id,
             "ref_buhm_name": schema.ref_buhm_name,
-            "postal_address": "|".join(schema.postal_address.model_dump().values()),
+            "postal_address": (
+                "|".join(schema.postal_address.model_dump().values())
+                if schema.postal_address
+                else None
+            ),
             "timezone": schema.timezone,
             "updated_by": schema.created_by,
             "created_by": schema.created_by,
-            "transaction_id": transaction_id,
-            "order_id": order_id,
         }
 
         return cls(**content)

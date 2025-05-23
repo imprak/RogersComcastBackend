@@ -52,4 +52,4 @@ class HubReturn(HubBase):
     updated_at: datetime = Field(alias="updatedAt")
 
     transaction_id: UUID4 = Field(alias="transactionId")
-    order_id: str | None = Field(None, alias="orderId")
+    order_id: UUID4 | None = Field(None, alias="orderId")
