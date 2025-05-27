@@ -1,3 +1,5 @@
+import os.path
+
 import time
 import uuid
 
@@ -15,9 +17,11 @@ class OrderValidation:
         self.db = db
         self.db_obj_orders = cruds.order_cruds.get_multi_in_progress(self.db)
 
-    def validate_orders(self, db_obj_order: models.Order):
+    def validate_hub_orders(self, db_obj_order: models.Order):
         log.info(f"Validating order {db_obj_order.order_id}")
-        full_file_path = f"{settings.ORDER_STORAGE_PATH}/{db_obj_order.file_name}"
+        full_file_path = os.path.join(
+            settings.ORDER_STORAGE_PATH, db_obj_order.file_name
+        )
         df = pd.read_csv(full_file_path)
         record_list = df.to_dict(orient="records")
         log.info(f"record_list count {len (record_list)}")
@@ -33,7 +37,6 @@ class OrderValidation:
                     data_in=data_in,
                     parent_hub_name=data_in.ref_parent_hub_name,
                     hub_id=hub_id,
-                    transaction_id=db_obj_order.transaction_id,
                     order_id=db_obj_order.order_id,
                 )
                 success_record_list.append(record)
@@ -43,31 +46,16 @@ class OrderValidation:
                 )
                 errored_record_list.append(record)
 
-        if errored_record_list:
+        if success_record_list and not errored_record_list:
+            db_obj_order.order_status = enums.OrderStatus.COMPLETED
+            db_obj_order.message = "completed"
+            self.db.commit()
+        elif errored_record_list:
             db_obj_order.order_status = enums.OrderStatus.FAILED
-            db_obj_order.message = "failed"
+            db_obj_order.message = f"success count: {len(success_record_list)}, failed count: {len(errored_record_list)}"
             self.db.commit()
             df = pd.DataFrame(errored_record_list)
             df.to_csv(full_file_path, index=False)
-
-        if success_record_list:
-            db_obj_transaction = cruds.transaction_cruds.get_by_transaction_id(
-                db=self.db, transaction_id=db_obj_order.transaction_id
-            )
-            db_obj_transaction.transaction_status = enums.TransactionStatus.COMPLETED
-            db_obj_transaction.message = "completed"
-            if not errored_record_list:
-                db_obj_order.order_status = enums.OrderStatus.COMPLETED
-                db_obj_order.message = "completed"
-            self.db.commit()
-
-        else:
-            db_obj_transaction = cruds.transaction_cruds.get_by_transaction_id(
-                db=self.db, transaction_id=db_obj_order.transaction_id
-            )
-            db_obj_transaction.transaction_status = enums.TransactionStatus.FAILED
-            db_obj_transaction.message = "failed"
-            self.db.commit()
 
 
 def trigger_order_validation():
@@ -82,7 +70,10 @@ def trigger_order_validation():
             )
             for db_obj_order in order_validation.db_obj_orders:
                 try:
-                    order_validation.validate_orders(db_obj_order)
+                    if db_obj_order.api_name == enums.ApiNameEnums.HUB:
+                        order_validation.validate_hub_orders(db_obj_order)
+                    else:
+                        log.info("Development under progress for non hub apis")
                 except Exception as err:
                     log.error(
                         f"Error occurred while validating the order {str(db_obj_order.order_id)}: {str(err)}"

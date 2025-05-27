@@ -1,6 +1,17 @@
 import uuid
 
-from sqlalchemy import Column, DateTime, Integer, Boolean, String, UUID, func, Text
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Integer,
+    Boolean,
+    String,
+    UUID,
+    func,
+    Text,
+    ForeignKey,
+)
+from sqlalchemy.orm import relationship
 
 from app.models import Base
 from app import schemas
@@ -11,7 +22,7 @@ class SiteIntent(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     is_draft = Column(Boolean, default=True)
-    site_intent_id = Column(UUID, default=uuid.uuid4())
+    site_intent_id = Column(UUID, unique=True)
     site_intent_name = Column(String(255), nullable=False)
     ref_hub_name = Column(String(255), nullable=False)
     ref_hub_id = Column(UUID, nullable=False)
@@ -24,14 +35,25 @@ class SiteIntent(Base):
     internet_routed_ipv4 = Column(Text(), nullable=True)
     internet_routed_ipv6 = Column(Text(), nullable=True)
 
-    created_by = Column(String(255), nullable=False)
-    updated_by = Column(String(255), nullable=False)
+    created_by = Column(String(255), nullable=True)
+    updated_by = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), default=func.utc_timestamp())
     updated_at = Column(DateTime(timezone=True), default=func.utc_timestamp())
 
+    transaction_id = Column(
+        UUID, ForeignKey("transaction.transaction_id"), nullable=True
+    )
+    order_id = Column(UUID, ForeignKey("order.order_id"), nullable=True)
+
+    transaction = relationship("Transaction", back_populates="site_intents")
+    order = relationship("Order", back_populates="site_intents")
+
     @classmethod
-    def from_schema(cls, schema: schemas.SiteIntentCreate) -> "SiteIntent":
+    def from_schema(
+        cls, schema: schemas.SiteIntentCreate, site_intent_id
+    ) -> "SiteIntent":
         content = {
+            "site_intent_id": site_intent_id,
             "site_intent_name": schema.site_intent_name,
             "ref_hub_name": schema.ref_hub_name,
             "ref_hub_id": schema.ref_hub_id,
@@ -92,6 +114,8 @@ class SiteIntent(Base):
             "updated_by": self.updated_by,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
+            "transaction_id": self.transaction_id,
+            "order_id": self.order_id,
         }
         return schemas.SiteIntentReturn.model_validate(
             content, by_name=True

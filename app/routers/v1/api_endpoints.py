@@ -11,7 +11,7 @@ from app.dependencies.db_session import get_db
 router = APIRouter(tags=["Home Screen"])
 
 
-@router.post("/partners/{partnerId}/network/apis")
+@router.post("/partners/{partnerId}/network/api")
 async def create(
     data_in: schemas.ApiCreate,
     partner_id: str = Path(alias="partnerId"),
@@ -27,7 +27,7 @@ async def create(
     )
 
 
-@router.get("/partners/{partnerId}/network/apis")
+@router.get("/partners/{partnerId}/network/api")
 def get_multi(
     partner_id: str = Path(alias="partnerId"),
     client_id: str = Query(None, alias="clientId"),
@@ -35,10 +35,16 @@ def get_multi(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1),
 ):
-    db_objs = cruds.api_cruds.get_multi(db=db, page=page, page_size=page_size)
+    db_objs, total_count = cruds.api_cruds.get_multi(
+        db=db, page=page, page_size=page_size
+    )
+
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content=[jsonable_encoder(db_obj.to_schema()) for db_obj in db_objs],
+        content={
+            "records": [jsonable_encoder(db_obj.to_schema()) for db_obj in db_objs],
+            "total_count": total_count,
+        },
     )
 
 

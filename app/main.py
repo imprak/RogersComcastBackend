@@ -12,6 +12,7 @@ from app.routers.v1 import (
     order_endpoints,
 )
 from app.services.background_order_service import trigger_order_validation
+from app.middleware.exception_handlers import register_handlers
 
 threading.Thread(target=trigger_order_validation).start()
 
@@ -27,6 +28,9 @@ app.include_router(site_intent_endpoints.router, prefix="/api/v1")
 app.include_router(ppod_intent_endpoints.router, prefix="/api/v1")
 app.include_router(transaction_endpoints.router, prefix="/api/v1")
 app.include_router(order_endpoints.router, prefix="/api/v1")
+
+# Register Custom Exception/Error Handlers
+register_handlers(app)
 
 
 app.add_middleware(

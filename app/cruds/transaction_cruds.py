@@ -1,3 +1,4 @@
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from app import schemas, models
@@ -27,11 +28,18 @@ class TransactionCrud:
         return db_obj
 
     @staticmethod
-    def get_multi(db: Session, page=1, page_size=10) -> list:
+    def get_multi(db: Session, page=1, page_size=10) -> (list, int):
         offset = (page - 1) * page_size
-        db_objs = db.query(models.Transaction).offset(offset).limit(page_size).all()
+        db_objs = (
+            db.query(models.Transaction)
+            .order_by(desc(models.Transaction.updated_by))
+            .offset(offset)
+            .limit(page_size)
+            .all()
+        )
+        total_count = db.query(models.Transaction).count()
 
-        return db_objs
+        return db_objs, total_count
 
     @staticmethod
     def delete(db: Session, db_obj: models.Transaction) -> None:

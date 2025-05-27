@@ -1,8 +1,21 @@
-class NotFoundError(Exception):
+class BackendError(Exception):
     pass
 
 
-class ConflictError(Exception):
+class NotFoundError(BackendError):
     pass
+
+
+class ConflictError(BackendError):
+    pass
+
+
+class BadRequestError(BackendError):
+    pass
+
+
+class AuthenticationError(BackendError):
+    pass
+
 
 

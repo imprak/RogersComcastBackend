@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, Field, UUID4, field_validator
 
@@ -8,9 +7,9 @@ from app.core import enums
 
 class OrderBase(BaseModel):
     file_name: str = Field(alias="fileName")
-    transaction_id: UUID4 = Field(alias="transactionId")
     order_status: enums.OrderStatus = Field(alias="orderStatus")
     message: str | None = Field(None)
+    api_name: enums.ApiNameEnums = Field(alias="apiName", examples=["hub"])
 
     created_by: str = Field(None, alias="createdBy", exclude=True)
     updated_by: str = Field(None, alias="updatedBy", exclude=True)

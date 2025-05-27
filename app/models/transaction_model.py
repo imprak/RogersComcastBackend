@@ -1,4 +1,3 @@
-import uuid
 from sqlalchemy import Column, DateTime, Integer, String, func, Text, UUID, Enum
 from sqlalchemy.orm import relationship
 
@@ -21,8 +20,9 @@ class Transaction(Base):
     created_at = Column(DateTime(timezone=True), default=func.utc_timestamp())
     updated_at = Column(DateTime(timezone=True), default=func.utc_timestamp())
 
-    hub = relationship("Hub", back_populates="transaction")
-    order = relationship("Order", back_populates="transaction")
+    hubs = relationship("Hub", back_populates="transaction")
+    site_intents = relationship("SiteIntent", back_populates="transaction")
+    ppod_intents = relationship("PpodIntent", back_populates="transaction")
 
     @classmethod
     def from_schema(

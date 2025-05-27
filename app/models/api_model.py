@@ -1,8 +1,9 @@
 from uuid import UUID as CORE_UUID
-from sqlalchemy import Column, DateTime, Integer, String, func, Text, UUID
+from sqlalchemy import Column, DateTime, Integer, String, func, Text, UUID, Enum
 
 from app.models import Base
 from app import schemas
+from app.core import enums
 
 
 class Api(Base):
@@ -10,7 +11,7 @@ class Api(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     api_id = Column(UUID, nullable=False)
-    api_name = Column(String(255), nullable=False)
+    api_name = Column(Enum(enums.ApiNameEnums), unique=True, nullable=False)
     api_category = Column(String(255), nullable=False)
     comment = Column(Text(), nullable=True)
 

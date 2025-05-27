@@ -56,7 +56,7 @@ class IntegrationBase:
         )
 
         if response.status_code == 404:
-            raise exceptions.NotFoundError(f"Not found error: {response.json()}")
+            raise exceptions.NotFoundError(f"Record not found error: {response.json()}")
 
         return response
 
@@ -69,7 +69,7 @@ class HubIntegration(IntegrationBase):
     def create(self, data: dict) -> dict:
         return {"hub_id": uuid.uuid4()}
 
-    def update(self, hub_id: uuid.UUID) -> dict:
+    def update(self, hub_id: uuid.UUID, data: dict) -> dict:
         return dict()
 
     def delete(self, hub_id: uuid.UUID) -> None:
@@ -90,9 +90,9 @@ class SiteIntentIntegration(IntegrationBase):
         log.info(f"Site intent record created over comcast platform")
         return response.json()
 
-    def update(self, site_intent_id: uuid.UUID) -> dict:
+    def update(self, site_intent_id: uuid.UUID, data: dict) -> dict:
         url = self.url + f"/{site_intent_id}"
-        response = self.make_http_call(url=url, method="PUT")
+        response = self.make_http_call(url=url, method="PUT", data=data)
         if response not in [200, 201]:
             err = f"Failed to update site intent: {response.text}"
             log.error(err)
@@ -126,9 +126,9 @@ class PpodIntentIntegration(IntegrationBase):
         log.info(f"Ppod intent record created over comcast platform")
         return response.json()
 
-    def update(self, ppod_intent_id: uuid.UUID) -> dict:
+    def update(self, ppod_intent_id: uuid.UUID, data: dict) -> dict:
         url = self.url + f"/{ppod_intent_id}"
-        response = self.make_http_call(url=url, method="PUT")
+        response = self.make_http_call(url=url, method="PUT", data=data)
         if response not in [200, 201]:
             err = f"Failed to update ppod intent: {response.text}"
             log.error(err)

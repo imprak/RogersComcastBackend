@@ -12,7 +12,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from app.models import Base
-from app import schemas
+from app import schemas, models
 
 
 class Hub(Base):
@@ -31,7 +31,7 @@ class Hub(Base):
     postal_address = Column(Text(), nullable=True)
     timezone = Column(String(255), nullable=True)
     transaction_id = Column(
-        UUID, ForeignKey("transaction.transaction_id"), nullable=False
+        UUID, ForeignKey("transaction.transaction_id"), nullable=True
     )
     order_id = Column(UUID, ForeignKey("order.order_id"), nullable=True)
 
@@ -40,16 +40,16 @@ class Hub(Base):
     created_at = Column(DateTime(timezone=True), default=func.utc_timestamp())
     updated_at = Column(DateTime(timezone=True), default=func.utc_timestamp())
 
-    transaction = relationship("Transaction", back_populates="hub")  # ORM relationship
+    transaction = relationship("Transaction", back_populates="hubs")  # ORM relationship
     order = relationship("Order", back_populates="hubs")  # ORM relationship
 
     @classmethod
     def from_schema(
         cls,
+        hub_id,
         schema: schemas.HubCreate,
         parent_hub_name: str,
-        transaction_id: str,
-        hub_id,
+        transaction_id: str | None = None,
         order_id: str | None = None,
     ) -> "Hub":
         content = {
@@ -74,6 +74,26 @@ class Hub(Base):
         }
 
         return cls(**content)
+
+    @staticmethod
+    def from_update_schema(db_obj: "Hub", data_in: schemas.HubUpdate):
+        db_obj.hub_name = data_in.hub_name
+        db_obj.hub_type = data_in.hub_type
+        db_obj.ref_buhm_id = data_in.ref_buhm_id
+        db_obj.ref_buhm_name = data_in.ref_buhm_name
+        db_obj.ref_parent_hub_name = data_in.ref_parent_hub_name
+        db_obj.ref_parent_hub_id = data_in.ref_parent_hub_id
+        db_obj.parent_hub_name = data_in.ref_parent_hub_name
+        db_obj.timezone = data_in.timezone
+        db_obj.created_by = data_in.created_by
+        db_obj.updated_by = data_in.updated_by
+        db_obj.postal_address = (
+            "|".join(data_in.postal_address.model_dump().values())
+            if data_in.postal_address
+            else None
+        )
+
+        return db_obj
 
     def to_schema(self) -> schemas.HubReturn:
         content = {

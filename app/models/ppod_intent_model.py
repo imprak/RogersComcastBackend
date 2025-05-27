@@ -1,7 +1,17 @@
 import uuid
-from uuid import UUID as CORE_UUID
 
-from sqlalchemy import Column, DateTime, Integer, Boolean, String, UUID, func, Text
+from sqlalchemy import (
+    Column,
+    DateTime,
+    Integer,
+    Boolean,
+    String,
+    UUID,
+    func,
+    Text,
+    ForeignKey,
+)
+from sqlalchemy.orm import relationship
 
 
 from app.models import Base
@@ -13,7 +23,7 @@ class PpodIntent(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     is_draft = Column(Boolean, default=True)
-    ppod_intent_id = Column(UUID, default=uuid.uuid4())
+    ppod_intent_id = Column(UUID, unique=True)
     ppod_intent_name = Column(String(255), nullable=False)
     cpod_intent_id = Column(UUID, nullable=True)
     ref_cpod_intent_id = Column(UUID, nullable=False)
@@ -66,17 +76,25 @@ class PpodIntent(Base):
     ref_scn_profile_id = Column(UUID, nullable=True)
     ref_scn_profile_name = Column(String(255), nullable=True)
 
-    created_by = Column(String(255), nullable=False)
-    updated_by = Column(String(255), nullable=False)
+    created_by = Column(String(255), nullable=True)
+    updated_by = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), default=func.utc_timestamp())
     updated_at = Column(DateTime(timezone=True), default=func.utc_timestamp())
 
+    transaction_id = Column(
+        UUID, ForeignKey("transaction.transaction_id"), nullable=True
+    )
+    order_id = Column(UUID, ForeignKey("order.order_id"), nullable=True)
+
+    transaction = relationship("Transaction", back_populates="ppod_intents")
+    order = relationship("Order", back_populates="ppod_intents")
+
     @classmethod
     def from_schema(
-        cls,
-        schema: schemas.PpodIntentCreate,
+        cls, schema: schemas.PpodIntentCreate, ppod_intent_id
     ) -> "PpodIntent":
         content = {
+            "ppod_intent_id": ppod_intent_id,
             "ppod_intent_name": schema.ppod_intent_name,
             "ref_cpod_intent_id": schema.ref_cpod_intent_id,
             "ref_cpod_intent_name": schema.ref_cpod_intent_name,
@@ -246,6 +264,8 @@ class PpodIntent(Base):
             "updated_by": self.updated_by,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
+            "transaction_id": self.transaction_id,
+            "order_id": self.order_id,
         }
 
         return schemas.PpodIntentReturn.model_validate(

@@ -2,9 +2,11 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, UUID4
 
+from app.core import enums
+
 
 class ApiBase(BaseModel):
-    api_name: str = Field(alias="apiName")
+    api_name: enums.ApiNameEnums = Field(alias="apiName", examples=["hub"])
     api_category: str = Field(alias="apiCategory")
     comment: str
 

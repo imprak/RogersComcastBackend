@@ -46,3 +46,6 @@ class SiteIntentReturn(SiteIntentBase):
     updated_by: str = Field(alias="updatedBy")
     created_at: datetime = Field(alias="createdAt")
     updated_at: datetime = Field(alias="updatedAt")
+
+    transaction_id: Optional[UUID4] = Field(alias="transactionId")
+    order_id: Optional[UUID4] = Field(None, alias="orderId")
